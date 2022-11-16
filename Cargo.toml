@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.0.22", features = ["derive"] }
 terminal_size = "0.2.2"
+termios = "0.3.3"

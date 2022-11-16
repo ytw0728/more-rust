@@ -7,7 +7,7 @@ use clap::Parser;
 pub struct Args {
    /// maximum lines of contents window
    #[arg(short, long)]
-   pub lines: i32,
+   pub lines: Option<i32>,
 
    pub path: String
 }
