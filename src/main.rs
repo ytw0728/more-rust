@@ -34,20 +34,25 @@ fn main() {
     stdout.flush()
             .expect("Failed to flush stdout.");
 
+    let lines = contents.as_str().lines().collect::<Vec<_>>();
+
     loop {
         // writeln!(stdout, "\x1B[2J\x1B[1;1H") // all clear는 너무 버벅댄다.
         writeln!(stdout, "\x1b[1;1H")
                 .expect("Failed to write file content.");
 
-        for (line_no, line) in contents.as_str().lines().enumerate().filter(|&(i, _)|{
-            (start_line..(start_line + window_size)).contains(&(i as i32))
-        }) {
-            writeln!(stdout, "\x1b[2K{}:\t{}", line_no + 1, line)
+        for (line_no, line) in lines[(start_line as usize)..((start_line + window_size) as usize)].iter().enumerate() {
+            writeln!(stdout, "\x1b[2K{}:\t{}", start_line as usize + line_no + 1, line)
                 .expect("Failed to write file content.");
         }
 
-        write!(stdout, "\x1b[{};1H:", terminal_size + 2)
+        if start_line + window_size == total_size {
+            write!(stdout, "\x1b[{};1HEND", terminal_size + 2)
                 .expect("Failed to write file content.");
+        } else {
+            write!(stdout, "\x1b[{};1H:", terminal_size + 2)
+                .expect("Failed to write file content.");
+        }
 
         stdout.flush()
             .expect("Failed to flush stdout.");
@@ -70,13 +75,21 @@ fn main() {
                     }
                     // arrow right / ANSI escape sequences (27, 91, 67) ^[C
                     b'l' => {
-                        start_line = cmp::min(start_line + 1, total_size);
+                        start_line = cmp::min(start_line + 1, total_size - window_size);
                         break Command::DOWN
                     },
                     // arrow down / ANSI escape sequences (27, 91, 66) ^[B
                     b'j' => {
-                        start_line = cmp::min(start_line + 1, total_size);
+                        start_line = cmp::min(start_line + 1, total_size - window_size);
                         break Command::DOWN;
+                    },
+                    b'f' => {
+                        start_line = cmp::min(start_line + window_size, total_size - window_size);
+                        break Command::DOWN
+                    },
+                    b'b' => {
+                        start_line = cmp::max(start_line - window_size, 0);
+                        break Command::UP
                     },
                     _ => ()
                 }
