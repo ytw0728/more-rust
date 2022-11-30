@@ -6,7 +6,7 @@ pub fn read_char() -> u8 {
     let stdin = 0; // couldn't get std::os::unix::io::FromRawFd to work on /dev/stdin or /dev/tty
     let termios = Termios::from_fd(stdin).unwrap();
 
-    let mut new_termios = termios.clone();  // make a mutable copy of termios that we will modify
+    let mut new_termios = termios;  // make a mutable copy of termios that we will modify
     new_termios.c_lflag &= !(ICANON | ECHO); // no echo and canonical mode
 
     tcsetattr(stdin, TCSANOW, &mut new_termios).unwrap();
